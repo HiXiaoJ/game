@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>snake</title>
+</head>
+<style>
+    #canvas{
+        box-shadow: 0 0 5px rgba(0,0,0,.5);
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+    }
+</style>
+<body>
+    <canvas width="800" height="500" id="canvas">
+        当前浏览器不支持canvas
+    </canvas>
+
+
+    <script>
+        var canvas = document.getElementById('canvas')
+        var ctx = canvas.getContext('2d')
+        /*创建方块*/
+        function Rect(x, y, w, h,color) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+            this.color = color
+        }
+        Rect.prototype.draw = function() {
+            ctx.beginPath()
+            ctx.fillStyle = this.color
+            ctx.rect(this.x, this.y, this.w, this.h)
+            ctx.fill()
+            ctx.stroke()
+        }
+
+        function Snake() {
+            var snakeArr = []
+            for(var i = 0; i < 20; i++) {
+                var rect = new Rect(i * 20, 0, 20, 20, 'gray')
+                snakeArr.unshift(rect)
+            }
+
+            var head = snakeArr[0]
+            head.color = 'yellow'
+
+            this.snakes = snakeArr
+            this.head = head
+
+            this.direction = 39
+        }
+        Snake.prototype.drow = function(){
+            for(var i = 0; i < this.snakes.length; i++) {
+                this.snakes[i].draw()
+            }
+        }
+        Snake.prototype.move = function(){
+            if((this.direction === 39 && this.head.x >= canvas.width-20) || (this.head.x <= 0 && this.direction === 37) || (this.direction === 40 && this.head.y >= canvas.height-20) || (this.direction === 38 && this.head.y <= 0)){
+                console.log(this.head.x);
+                return clearInterval(timer)
+            }
+            for(var i = 1; i < this.snakes.length; i++) {
+                if(this.head.x == this.snakes[i].x && this.head.y == this.snakes[i].y) {
+                    clearInterval(timer)
+                    return
+                }
+            }
+
+            var rect = new Rect(this.head.x, this.head.y, 20,20,'gray')
+
+            this.snakes.splice(1,0, rect)
+
+            if(this.head.x == food.x && this.head.y == food.y) {
+                food = new Food()
+            }else{
+                this.snakes.pop()
+            }
+
+
+
+            switch(this.direction){
+                default:
+                    break;
+                case 39:
+                    this.head.x +=20;
+                    break;
+                case 37:
+                    this.head.x -=20;
+                    break;
+                case 38:
+                    this.head.y -=20;
+                    break;
+                case 40:
+                    this.head.y +=20;
+                    break;
+            }
+
+
+        }
+        function getRandom (min, max) {
+            return Math.round(Math.random() * (max - min) + min)
+        }
+        function Food() {
+
+
+          var isfit = true
+            while(isfit){
+                isfit = false
+                var x =getRandom(0,canvas.width / 20 - 1)
+                var y =getRandom(0,canvas.height / 20 - 1)
+                var rect = new Rect(x * 20, y * 20, 20, 20, 'red')
+                for(var i = 0; i < snake.snakes.length; i++) {
+                    if(snake.snakes[i].x == rect.x && snake.snakes[i].y == rect.y){
+                        isfit = true
+                        break;
+                    }
+                }
+            }
+            return rect
+        }
+        var snake = new Snake()
+        snake.drow()
+        var food = new Food()
+        var timer = setInterval(() =>{
+            ctx.clearRect(0,0,canvas.width, canvas.height)
+            food.draw()
+            snake.move()
+            snake.drow()
+
+        },100)
+            document.onkeydown = function(e){
+            var evt = e || window.event
+            switch(evt.keyCode) {
+                default:
+                    break;
+                case 37:
+                    if(snake.direction !== 39) {
+                        snake.direction = 37
+                    }
+                    break;
+                case 38:
+                    if(snake.direction !== 40) {
+                        snake.direction = 38
+                    }
+                    break;
+                case 39:
+                    if(snake.direction !== 37) {
+                        snake.direction = 39
+                    }
+                    break;
+                case 40:
+                    if(snake.direction !== 38) {
+                        snake.direction = 40
+                    }
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
